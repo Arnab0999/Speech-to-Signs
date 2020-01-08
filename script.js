@@ -1,9 +1,8 @@
 var SpeechRecognition = window.webkitSpeechRecognition;
-  
 var recognition = new SpeechRecognition();
 var listening = 'I am Listening...';
-var noWork = 'Not listening. \n Press Speak button and say anything.';
-var stListen = 'Press Stop button to stop Listening.';
+var noWork = 'Not listening. \n Press Mic button and say anything.';
+var stListen = 'Press Mic off button to stop Listening.';
 var Textbox = document.getElementById('textbox');
 var instructions = document.getElementById('instructions');
 var bottomInstr = document.getElementById('bottom');
@@ -21,14 +20,6 @@ recognition.onresult = function(event) {
     Textbox.value = Content;
   
 };
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
 recognition.onstart = function() {
   instructions.innerHTML=listening; 
   bottomInstr.innerHTML=stListen;
@@ -59,34 +50,33 @@ $('#stop-btn').on('click',function(e){
 $('#textbox').on('input', function(e){
   Content = Textbox.value;
 });
-const map = {
-  uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  lowercase: "abcdefghijklmnopqrstuvwxyz"
-};
-function add(){
-  var text = document.getElementById('textbox').value;
-  for(let index=0; index<text.length; index++){
-    sleep(300);
-    var val = text[index];
-    if(val != ' '){
+function add(val){
       let request = new XMLHttpRequest();
       request.responseType = 'blob';
-      request.open('GET', 'http://localhost:5000/'+val+'.jpg');
+      if(val==' ')
+        request.open('GET', 'http://localhost:5000/space.png');
+      else
+        request.open('GET', 'http://localhost:5000/'+val+'.jpg');
 	    //request.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
       request.setRequestHeader("Access-Control-Allow-Origin", "*");
+      var img = new Image();
 	    request.onload = function() {
         var blob = this.response;
-        var img = new Image();
         img.height=200;
         img.width=100;
         img.src = window.URL.createObjectURL(blob);
-        document.getElementById('body').appendChild(img);
 	    };
       request.send();
-    }
-  }
-	
+    return img;
 }
 $('#getImage').on('click',function(e){
-  add();
+  var text = document.getElementById('textbox').value;
+  flag=1;
+  for(let index=0; index<text.length; index++){
+      var imgs = add(text[index]);
+      document.getElementById('body').appendChild(imgs);
+  }
+});
+$('#refresh').on('click',function(e){
+  document.location.reload();
 });
